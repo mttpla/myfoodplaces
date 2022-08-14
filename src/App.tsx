@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import './App.css';
-import { GoogleLogin, GoogleLogout } from "react-google-login";
+import { GoogleLogout } from "react-google-login";
 import { gapi } from "gapi-script";
 import ApiCalendar from "react-google-calendar-api";
-
+import WelcomePage from "./components/WelcomePage"
 interface UserInfo {
   imageUrl?: string;
   name?: string;
@@ -36,18 +36,14 @@ function App() {
     gapi.load("client:auth2", initClient);
   });
 
-  const onLoginSuccess = (res: any) => {
-      console.log('success:', res);
-      setUserInfo(res.profileObj);
-      apiCalendar.listUpcomingEvents(10).then(({ result }: any) => {
-        console.log(result.items);
-      });
-    };
-  
-  const onLoginFailure = (err: any) => {
-      console.log('failed:', err);
-    };
-  
+  useEffect(() => {
+    console.log('userInfo changed')
+  },[userInfo]);
+
+  const onLoginSuccess = (userInfo: UserInfo) => {
+    setUserInfo(userInfo);
+  };
+
   const onLogoutSuccess = () => {
       setUserInfo(null);
   };
@@ -71,14 +67,7 @@ function App() {
             />
           </div>
         ) : (
-          <GoogleLogin
-            clientId={config.clientId}
-            buttonText="Sign in with Google"
-            onSuccess={onLoginSuccess}
-            onFailure={onLoginFailure}
-            cookiePolicy={"single_host_origin"}
-            isSignedIn={true}
-          />
+          <WelcomePage clientId={config.clientId} onLoginSuccess={onLoginSuccess}/>
         )}
       </header>
     </div>
