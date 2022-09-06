@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import './App.css';
-import { GoogleLogout } from "react-google-login";
 import { gapi } from "gapi-script";
 import ApiCalendar from "react-google-calendar-api";
 import WelcomePage from "./components/WelcomePage"
-interface UserInfo {
+import UserInfoSection from "./components/UserInfoSection";
+import Button from "@mui/material/Button";
+
+export interface UserInfoI {
   imageUrl?: string;
   name?: string;
   email?: string;
@@ -22,9 +24,26 @@ const config = {
 console.log(process.env.REACT_APP_CLIENTID);
 
 function App() {
-  const [userInfo, setUserInfo] = useState<UserInfo | null >(null);
+  const [userInfo, setUserInfo] = useState<UserInfoI | null >(null);
   const apiCalendar = new ApiCalendar(config);
-  apiCalendar.setCalendar("mttpla@gmail.com");
+  apiCalendar.setCalendar(
+    "jms0ef3boo401f9aph8qk775h8@group.calendar.google.com"
+  );
+
+  var event = {
+  'summary': 'Google I/O 2015 mttpla 2022',
+  'location': '800 Howard St., San Francisco, CA 94103',
+  'description': 'A chance to hear more about Google\'s developer products.',
+  'start': {
+    'dateTime': '2022-08-28T09:00:00-07:00',
+    'timeZone': 'America/Los_Angeles'
+  },
+  'end': {
+    'dateTime': '2022-08-28T17:00:00-07:00',
+    'timeZone': 'America/Los_Angeles'
+  },
+  
+};
 
   useEffect(() => {
     const initClient = () => {
@@ -37,37 +56,44 @@ function App() {
   });
 
   useEffect(() => {
-    console.log('userInfo changed')
+    console.log('userInfo: ', userInfo )
+    // apiCalendar.listCalendars
   },[userInfo]);
 
-  const onLoginSuccess = (userInfo: UserInfo) => {
+  const onLoginSuccess = (userInfo: UserInfoI) => {
     setUserInfo(userInfo);
   };
 
   const onLogoutSuccess = () => {
-      setUserInfo(null);
+    setUserInfo(null);
   };
+  
   
   return (
     <div className="App">
       <header className="App-header">
         {userInfo ? (
-          <div>
-            <img
-              src={userInfo.imageUrl}
-              alt="user"
-              referrerPolicy="no-referrer"
-            />
-            <p>Name: {userInfo.name}</p>
-            <p>Email Address: {userInfo.email}</p>
-            <GoogleLogout
-              clientId={config.clientId}
-              buttonText="Log out"
-              onLogoutSuccess={onLogoutSuccess}
-            />
-          </div>
+          <><UserInfoSection
+            clientId={config.clientId}
+            userInfo={userInfo}
+            onLogoutSuccess={onLogoutSuccess} />
+            
+            <Button
+              onClick={() => {
+                apiCalendar
+                  .createEvent(event)
+                  .then((res: any) => console.log("res: ", res))
+                  .catch((e: Error) => console.log("error: ", e));
+                }}
+              >
+              Add event
+            </Button>
+            </>
         ) : (
-          <WelcomePage clientId={config.clientId} onLoginSuccess={onLoginSuccess}/>
+          <WelcomePage
+            clientId={config.clientId}
+            onLoginSuccess={onLoginSuccess}
+          />
         )}
       </header>
     </div>

@@ -1,12 +1,12 @@
 import React from "react";
 import { GoogleLogin } from "react-google-login";
 
-interface WelcomePageI {
+interface WelcomePageProps {
   clientId: string;
-  onLoginSuccess: any;
+  onLoginSuccess: CallableFunction;
 }
 
-class WelcomePage extends React.Component<WelcomePageI> {
+class WelcomePage extends React.Component<WelcomePageProps> {
   onLoginSuccess = (res: any) => {
     console.log("success:", res);
     this.props.onLoginSuccess(res.profileObj);
