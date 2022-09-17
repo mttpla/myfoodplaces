@@ -11,14 +11,14 @@ export class CalendarService {
     this.setCalendar();
   }
 
-  mapMfpEventToGoogle(event: MfpEvent) {
+  private mapMfpEventToGoogle(event: MfpEvent) {
     let gevent;
     // TODO
     gevent = event;
     return gevent;
   }
 
-  checkGapi = (): boolean => {
+  private checkGapi = (): boolean => {
     if (this.client && this.client.getToken() && this.client.calendar) {
       return true;
     } else {
@@ -27,18 +27,18 @@ export class CalendarService {
     }
   };
 
-  async setCalendar(): Promise<void> {
+  private async setCalendar(): Promise<void> {
     if (this.checkGapi()) {
       const calList = (await this.client.calendar.calendarList.list()).result.items;
-      let mfpCalendar = calList.find((obj: { summary: string }) => {
+      let cal = calList.find((obj: { summary: string }) => {
         return obj.summary === this.calendarName;
       });
-      if (!mfpCalendar) {
-        mfpCalendar = await this.client.calendar.calendars.insert({
+      if (!cal) {
+        cal = await this.client.calendar.calendars.insert({
           summary: this.calendarName,
         }).result;
       }
-      this.calendarId = mfpCalendar.id;
+      this.calendarId = cal.id;
     }
   }
 
