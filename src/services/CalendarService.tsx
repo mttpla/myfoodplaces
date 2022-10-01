@@ -88,6 +88,7 @@ export class CalendarService {
           timeMax: search.timeMax.toISOString(),
           q: search.text,
           orderBy: "startTime",
+          maxResults: 50
         })
       ).result.items;
       console.log("query: ", search.text);
