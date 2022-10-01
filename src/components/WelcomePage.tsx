@@ -8,7 +8,6 @@ interface WelcomePageProps {
 
 class WelcomePage extends React.Component<WelcomePageProps> {
   onLoginSuccess = (res: any) => {
-    console.log("success:", res);
     this.props.onLoginSuccess(res.profileObj);
   };
 

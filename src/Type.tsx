@@ -11,7 +11,7 @@ export interface Config {
   discoveryDocs: [string];
 }
 
-export interface MfpEvent {
+export interface Place {
   summary: string;
   description: {
     vote: number;
@@ -25,6 +25,12 @@ export interface MfpEvent {
   end: {
     dateTime: string;
   };
+}
+
+export interface SearchParams {
+  text: string;
+  timeMin: Date;
+  timeMax: Date;
 }
 
 

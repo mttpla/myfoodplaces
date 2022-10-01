@@ -1,50 +1,71 @@
-import { MfpEvent } from "../Type";
+import { Place, SearchParams } from "../Type";
 
 export class CalendarService {
-  calendarName = "MyFoodPlacesApp";
-  calendarId = "primary";
-  client: any;
+  private DEFAULT_CALENDAR_ID = "primary";
+  private calendarName = "MyFoodPlacesApp";
+  private calendarId = this.DEFAULT_CALENDAR_ID;
+  private client: any;
+  private calendar: any;
+  
 
-  constructor(gapi: any) {
-    console.log("constructor", gapi);
+  init(gapi: any) {
+    console.log("CalendarService init", gapi);
     this.client = gapi.client;
+    this.calendar = gapi.client.calendar;
     this.setCalendar();
   }
 
-  private mapMfpEventToGoogle(event: MfpEvent) {
+  private mapPlaceToGoogleEvent(place: Place) {
     let gevent;
     // TODO
-    gevent = event;
+    gevent = place;
     return gevent;
   }
 
   private checkGapi = (): boolean => {
-    if (this.client && this.client.getToken() && this.client.calendar) {
+    if (
+      this.client &&
+      this.client.getToken() &&
+      this.calendar 
+    ) {
       return true;
     } else {
-      console.error("Error: gapi not loaded");
+      console.error("Gapi not loaded");
+      return false;
+    }
+  }
+
+  isReady = (): boolean => {
+    if (this.checkGapi() &&
+    this.calendarId !== this.DEFAULT_CALENDAR_ID
+    ) {
+      return true;
+    } else {
+      console.error("CalendarService not ready");
       return false;
     }
   };
 
   private async setCalendar(): Promise<void> {
     if (this.checkGapi()) {
-      const calList = (await this.client.calendar.calendarList.list()).result.items;
+      const calList = (await this.calendar.calendarList.list()).result
+        .items;
       let cal = calList.find((obj: { summary: string }) => {
         return obj.summary === this.calendarName;
       });
       if (!cal) {
-        cal = await this.client.calendar.calendars.insert({
+        cal = await this.calendar.calendars.insert({
           summary: this.calendarName,
         }).result;
       }
       this.calendarId = cal.id;
     }
+    console.log("calendar selected: ", this.calendarId);
   }
 
-  async createEvent(event: MfpEvent) {
-    if (this.checkGapi()) {
-      const gevent = this.mapMfpEventToGoogle(event);
+  async createPlace(place: Place) {
+    if (this.isReady()) {
+      const event = this.mapPlaceToGoogleEvent(place);
       /* console.log(
         "direct result",
         await this.client.calendar.events.insert({
@@ -53,5 +74,26 @@ export class CalendarService {
         })
       ); */
     }
+  }
+
+  async getPlaces(search: SearchParams): Promise<Place[]> {
+    if (this.isReady()) {
+      console.log("run getPlaces: ", this.calendarId);
+      const events = (
+        await this.calendar.events.list({
+          calendarId: this.calendarId,
+          showDeleted: false,
+          singleEvents: true,
+          timeMin: search.timeMin.toISOString(),
+          timeMax: search.timeMax.toISOString(),
+          q: search.text,
+          orderBy: "startTime",
+        })
+      ).result.items;
+      console.log("query: ", search.text);
+      console.log("res: ", events);
+      return events;
+    }
+    return [];
   }
 }

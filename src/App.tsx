@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import './App.css';
 import { gapi } from "gapi-script";
-import { Config, MfpEvent, UserInfoI } from "./Type";
+import { Config, Place, SearchParams, UserInfoI } from "./Type";
 import WelcomePage from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
 import Button from "@mui/material/Button";
 import { CalendarService } from "./services/CalendarService";
+import SearchForm from "./components/SearchForm";
+
 
 const config: Config = {
   clientId: process.env.REACT_APP_CLIENTID || "missing key",
@@ -17,10 +19,18 @@ const config: Config = {
 };
 
 function App() {
+  
   const [userInfo, setUserInfo] = useState<UserInfoI | null >(null);
-  let calendar = new CalendarService(gapi);
+  const [places, setPlaces] = useState<Place[]>([]);
+  const [searchParams, setSearchParams] = useState<SearchParams>({
+    text: "",
+    timeMin: new Date('2021-09-01'), //TODO set month - 12
+    timeMax: new Date(),
+  });
 
-  var event: MfpEvent = {
+  const calendar = useRef(new CalendarService());
+
+  var place: Place = {
     summary: "Google I/O 2015 mttpla 2022",
     location: "800 Howard St., San Francisco, CA 94103",
     description: { vote: 5, comment: "ricercami", price: 5 },
@@ -38,11 +48,34 @@ function App() {
         clientId: config.clientId,
         scope: config.scope,
         apiKey: config.apiKey,
-        discoveryDocs: config.discoveryDocs
+        discoveryDocs: config.discoveryDocs,
       });
     };
     gapi.load("client:auth2", initClient);
-  });
+  }, []);
+
+  useEffect(() => {
+    const now: Date = new Date();
+    now.setDate(now.getMonth() - 12);
+    setSearchParams({
+      text: searchParams.text,
+      timeMin: now,
+      timeMax: searchParams.timeMax,
+    });
+  }, []);
+
+  useEffect(() =>{
+    if (userInfo) {
+      calendar.current.init(gapi);
+    }
+  }, [userInfo])
+
+  useEffect(() => {
+    calendar.current
+      .getPlaces(searchParams)
+      .then((res) => setPlaces(res));
+    console.log("App: getPlaces: ", searchParams);
+  }, [searchParams]);
 
   const onLoginSuccess = (userInfo: UserInfoI) => {
     setUserInfo(userInfo);
@@ -51,25 +84,39 @@ function App() {
   const onLogoutSuccess = () => {
     setUserInfo(null);
   };
-  
-  
+
   return (
     <div className="App">
       <header className="App-header">
         {userInfo ? (
-          <><UserInfoSection
-            clientId={config.clientId}
-            userInfo={userInfo}
-            onLogoutSuccess={onLogoutSuccess} />
-            
+          <>
+            <UserInfoSection
+              clientId={config.clientId}
+              userInfo={userInfo}
+              onLogoutSuccess={onLogoutSuccess}
+            />
+
             <Button
               onClick={() => {
-                calendar.createEvent(event)
-                }}
-              >
+                calendar.current.createPlace(place);
+              }}
+            >
               Add event
             </Button>
-            </>
+            <div style={{ padding: "0.5em" }}>
+              <div>
+                <SearchForm
+                  search={searchParams}
+                  searchFn={setSearchParams}
+                />
+                <h4>Places</h4>
+                {places.length === 0 && <p>No events to show</p>}
+                {places.map((place: any) => (
+                  <p key={place.summary}>{JSON.stringify(place)}</p>
+                ))}
+              </div>
+            </div>
+          </>
         ) : (
           <WelcomePage
             clientId={config.clientId}
