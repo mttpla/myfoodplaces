@@ -7,6 +7,7 @@ import UserInfoSection from "./components/UserInfoSection";
 import Button from "@mui/material/Button";
 import { CalendarService } from "./services/CalendarService";
 import SearchForm from "./components/SearchForm";
+import moment from "moment";
 
 
 const config: Config = {
@@ -24,7 +25,7 @@ function App() {
   const [places, setPlaces] = useState<Place[]>([]);
   const [searchParams, setSearchParams] = useState<SearchParams>({
     text: "",
-    timeMin: new Date('2021-09-01'), //TODO set month - 12
+    timeMin: moment().subtract(1, 'years').toDate(), 
     timeMax: new Date(),
   });
 
