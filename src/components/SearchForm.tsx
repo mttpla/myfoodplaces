@@ -36,9 +36,25 @@ class SearchForm extends React.Component<SearchFormProps> {
     );
   };
 
+  private handleSearchTextChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    this.handleSearchChange(
+      event.target.value,
+      this.props.search.timeMin,
+      this.props.search.timeMax
+    );
+  };
+
   render() {
     return (
       <div>
+        <TextField
+          id="searchText"
+          label="Text"
+          defaultValue={this.props.search.text}
+          onChange={this.handleSearchTextChange}
+        />
         <LocalizationProvider dateAdapter={AdapterMoment}>
           <MobileDatePicker
             label="From"
