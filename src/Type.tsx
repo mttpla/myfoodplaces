@@ -19,6 +19,7 @@ export interface Place {
   vote?: number;
   comment?: string;
   price?: number;
+  url?: string;  
   location?: string;
   date: string
 }

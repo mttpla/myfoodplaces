@@ -25,6 +25,7 @@ export class CalendarService {
         vote: place.vote,
         comment: place.comment,
         price: place.price,
+        url: place.url,
       },
       start : { date: place.date },
     }
@@ -41,6 +42,7 @@ export class CalendarService {
       date: event.start.date || event.start.dateTime,
       vote: event.description?.vote,
       comment: event.description?.comment,
+      url: event.description?.url,
       price: event.description?.price,
     };
     
@@ -79,6 +81,14 @@ export class CalendarService {
       this.calendarId = cal.id;
     }
     console.log("calendar selected: ", this.calendarId);
+  }
+
+  getNewPlace(): Place {
+    const place: Place = {
+      summary: "name",
+       date: new Date().toISOString(),
+    };
+    return place;
   }
 
   async createPlace(place: Place) {
