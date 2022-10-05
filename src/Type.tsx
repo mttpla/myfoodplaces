@@ -12,19 +12,15 @@ export interface Config {
 }
 
 export interface Place {
+  eventId?: string,
+  created?: string,
+  updated?: string,
   summary: string;
-  description: {
-    vote: number;
-    comment: string;
-    price: number;
-  };
-  location: string;
-  start: {
-    dateTime: string;
-  };
-  end: {
-    dateTime: string;
-  };
+  vote?: number;
+  comment?: string;
+  price?: number;
+  location?: string;
+  date: string
 }
 
 export interface SearchParams {

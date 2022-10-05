@@ -4,10 +4,10 @@ import { gapi } from "gapi-script";
 import { Config, Place, SearchParams, UserInfoI } from "./Type";
 import WelcomePage from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
-import Button from "@mui/material/Button";
 import { CalendarService } from "./services/CalendarService";
 import SearchForm from "./components/SearchForm";
 import moment from "moment";
+import PlaceList from "./components/PlaceList";
 
 
 const config: Config = {
@@ -31,17 +31,20 @@ function App() {
 
   const calendar = useRef(new CalendarService());
 
-  var place: Place = {
+  /* var place: Place = {
     summary: "Google I/O 2015 mttpla 2022",
     location: "800 Howard St., San Francisco, CA 94103",
-    description: { vote: 5, comment: "ricercami", price: 5 },
-    start: {
+    vote: 5, 
+    comment: "ricercami", 
+    price: 5 },
+    date: "2022-08-28T09:00:00-07:00",
+    /* start: {
       dateTime: "2022-08-28T09:00:00-07:00",
     },
     end: {
       dateTime: "2022-08-28T17:00:00-07:00",
-    },
-  };
+    }, */
+  
 
   useEffect(() => {
     const initClient = () => {
@@ -96,25 +99,15 @@ function App() {
               userInfo={userInfo}
               onLogoutSuccess={onLogoutSuccess}
             />
-
-            <Button
-              onClick={() => {
-                calendar.current.createPlace(place);
-              }}
-            >
-              Add event
-            </Button>
             <div style={{ padding: "0.5em" }}>
               <div>
                 <SearchForm
                   search={searchParams}
                   searchFn={setSearchParams}
                 />
-                <h4>Places</h4>
-                {places.length === 0 && <p>No events to show</p>}
-                {places.map((place: any) => (
-                  <p key={place.summary}>{JSON.stringify(place)}</p>
-                ))}
+                <PlaceList
+                  places={places}
+                />
               </div>
             </div>
           </>

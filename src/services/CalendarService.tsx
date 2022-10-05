@@ -6,7 +6,6 @@ export class CalendarService {
   private calendarId = this.DEFAULT_CALENDAR_ID;
   private client: any;
   private calendar: any;
-  
 
   init(gapi: any) {
     console.log("CalendarService init", gapi);
@@ -15,30 +14,50 @@ export class CalendarService {
     this.setCalendar();
   }
 
-  private mapPlaceToGoogleEvent(place: Place) {
-    let gevent;
-    // TODO
-    gevent = place;
+  private mapPlaceToGoogleEvent(place: Place): (any) {
+    const gevent: any = {
+      id: place.eventId,
+      created: place.created,
+      updated: place.updated,
+      summary: place.summary,
+      location: place.location,
+      description: {
+        vote: place.vote,
+        comment: place.comment,
+        price: place.price,
+      },
+      start : { date: place.date },
+    }
     return gevent;
   }
 
+  private mapGoogleEventToPlace(event: any):(Place) {
+    const place: Place = {
+      eventId: event.id,
+      created: event.created,
+      updated: event.updated,
+      summary: event.summary,
+      location: event.location,
+      date: event.start.date || event.start.dateTime,
+      vote: event.description?.vote,
+      comment: event.description?.comment,
+      price: event.description?.price,
+    };
+    
+    return place;
+  }
+
   private checkGapi = (): boolean => {
-    if (
-      this.client &&
-      this.client.getToken() &&
-      this.calendar 
-    ) {
+    if (this.client && this.client.getToken() && this.calendar) {
       return true;
     } else {
       console.error("Gapi not loaded");
       return false;
     }
-  }
+  };
 
   isReady = (): boolean => {
-    if (this.checkGapi() &&
-    this.calendarId !== this.DEFAULT_CALENDAR_ID
-    ) {
+    if (this.checkGapi() && this.calendarId !== this.DEFAULT_CALENDAR_ID) {
       return true;
     } else {
       console.error("CalendarService not ready");
@@ -48,8 +67,7 @@ export class CalendarService {
 
   private async setCalendar(): Promise<void> {
     if (this.checkGapi()) {
-      const calList = (await this.calendar.calendarList.list()).result
-        .items;
+      const calList = (await this.calendar.calendarList.list()).result.items;
       let cal = calList.find((obj: { summary: string }) => {
         return obj.summary === this.calendarName;
       });
@@ -88,12 +106,12 @@ export class CalendarService {
           timeMax: search.timeMax.toISOString(),
           q: search.text,
           orderBy: "startTime",
-          maxResults: 50
+          maxResults: 50,
         })
       ).result.items;
-      console.log("query: ", search.text);
       console.log("res: ", events);
-      return events;
+
+      return events.map((gevent: any) => this.mapGoogleEventToPlace(gevent));
     }
     return [];
   }
