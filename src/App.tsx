@@ -1,13 +1,23 @@
 import { useState, useEffect, useRef } from "react";
 import './App.css';
 import { gapi } from "gapi-script";
-import { Config, Place, SearchParams, UserInfoI } from "./Type";
+import { Config, Place, SearchParams, FeedbackMessage, UserInfoI } from "./utils/Type";
+import {
+  defaultFeedbackMessage,
+  defaultPlace,
+  genericErrorMessage,
+  genericSuccessMessage,
+} from "./utils/Constants";
 import WelcomePage from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
 import { CalendarService } from "./services/CalendarService";
 import SearchForm from "./components/SearchForm";
 import moment from "moment";
 import PlaceList from "./components/PlaceList";
+import Fab from "@mui/material/Fab";
+import AddIcon from '@mui/icons-material/Add';
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 
 const config: Config = {
@@ -28,23 +38,21 @@ function App() {
     timeMin: moment().subtract(1, 'years').toDate(), 
     timeMax: new Date(),
   });
-
+  const [currentPlaceId, setCurrentPlaceId] = useState<string | undefined | null>(null);
   const calendar = useRef(new CalendarService());
 
-  /* var place: Place = {
-    summary: "Google I/O 2015 mttpla 2022",
-    location: "800 Howard St., San Francisco, CA 94103",
-    vote: 5, 
-    comment: "ricercami", 
-    price: 5 },
-    date: "2022-08-28T09:00:00-07:00",
-    /* start: {
-      dateTime: "2022-08-28T09:00:00-07:00",
-    },
-    end: {
-      dateTime: "2022-08-28T17:00:00-07:00",
-    }, */
-  
+  const [feedbackMessage, setFeedbackMessage] = useState<FeedbackMessage>(defaultFeedbackMessage);
+
+
+  const handleFeedbackMessageClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setFeedbackMessage(defaultFeedbackMessage);
+  };
 
   useEffect(() => {
     const initClient = () => {
@@ -58,16 +66,6 @@ function App() {
     gapi.load("client:auth2", initClient);
   }, []);
 
-  useEffect(() => {
-    const now: Date = new Date();
-    now.setDate(now.getMonth() - 12);
-    setSearchParams({
-      text: searchParams.text,
-      timeMin: now,
-      timeMax: searchParams.timeMax,
-    });
-  }, []);
-
   useEffect(() =>{
     if (userInfo) {
       calendar.current.init(gapi);
@@ -75,19 +73,80 @@ function App() {
   }, [userInfo])
 
   useEffect(() => {
-    calendar.current
-      .getPlaces(searchParams)
-      .then((res) => setPlaces(res));
+    updatePlaces();
     console.log("App: getPlaces: ", searchParams);
+    setCurrentPlaceId(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  
+
   const onLoginSuccess = (userInfo: UserInfoI) => {
+    console.log("set user");
     setUserInfo(userInfo);
   };
 
   const onLogoutSuccess = () => {
+    console.log("set user to null");
     setUserInfo(null);
   };
+
+  function updatePlaces(): void {
+    calendar.current
+      .getPlaces(searchParams)
+      .then((res) => {
+        setPlaces(res);
+        setFeedbackMessage({
+          open: true,
+          text: genericSuccessMessage,
+          severity: "success",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        setFeedbackMessage({
+          open: true,
+          text: e.result?.error?.message || genericErrorMessage,
+          severity: "error",
+        });
+      });
+    console.log("App: getPlaces: ", searchParams);
+  }
+
+
+  const onSave = (place: Place) => {
+    console.log("onSave: ", place);
+    calendar.current
+      .createPlace(place)
+      .then(() => {
+        setFeedbackMessage({
+          open: true,
+          text: "Saved",
+          severity: "success",
+        });
+      })
+      .catch((e) => {
+        console.log(e);
+        setFeedbackMessage({
+          open: true,
+          text: e.result?.error?.message || genericErrorMessage,
+          severity: "error",
+        });
+      });
+    updatePlaces();
+    setCurrentPlaceId(null);
+  };
+
+  const onDelete = (place: Place) => {
+    console.log("onDelete: ", place);
+    updatePlaces();
+    setCurrentPlaceId(null);
+  };
+
+  const onSelect = (placeId: string) => {
+    console.log("onSelect: ", placeId);
+    setCurrentPlaceId(placeId);
+  }
 
   return (
     <div className="App">
@@ -101,15 +160,41 @@ function App() {
             />
             <div style={{ padding: "0.5em" }}>
               <div>
-                <SearchForm
-                  search={searchParams}
-                  searchFn={setSearchParams}
-                />
+                <SearchForm search={searchParams} searchFn={setSearchParams} />
                 <PlaceList
                   places={places}
+                  onSelect={onSelect}
+                  onSave={onSave}
+                  onDelete={onDelete}
+                  currentPlaceId={currentPlaceId}
                 />
               </div>
             </div>
+
+            <Fab
+              disabled={currentPlaceId === undefined}
+              onClick={() => {
+                console.log("FAB");
+                const placeList: Place[] = [defaultPlace, ...places];
+                setPlaces(placeList);
+                setCurrentPlaceId(undefined);
+              }}
+              color="primary"
+              aria-label="add"
+            >
+              <AddIcon />
+            </Fab>
+            <Snackbar open={feedbackMessage.open} 
+              autoHideDuration={6000} 
+              onClose={handleFeedbackMessageClose}>
+              <Alert
+                onClose={handleFeedbackMessageClose}
+                severity={feedbackMessage.severity}
+                sx={{ width: "100%" }}
+              >
+                {feedbackMessage.text}
+              </Alert>
+            </Snackbar>
           </>
         ) : (
           <WelcomePage
