@@ -1,4 +1,4 @@
-import { Place, SearchParams } from "../Type";
+import { Place, SearchParams } from "../utils/Type";
 
 export class CalendarService {
   private DEFAULT_CALENDAR_ID = "primary";
@@ -83,24 +83,18 @@ export class CalendarService {
     console.log("calendar selected: ", this.calendarId);
   }
 
-  getNewPlace(): Place {
-    const place: Place = {
-      summary: "name",
-       date: new Date().toISOString(),
-    };
-    return place;
-  }
+  
 
   async createPlace(place: Place) {
     if (this.isReady()) {
-      const event = this.mapPlaceToGoogleEvent(place);
-      /* console.log(
+      const gevent = this.mapPlaceToGoogleEvent(place);
+      console.log(
         "direct result",
         await this.client.calendar.events.insert({
           calendarId: this.calendarId,
           resource: gevent,
         })
-      ); */
+      ); 
     }
   }
 

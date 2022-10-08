@@ -4,7 +4,7 @@ import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import TextField from "@mui/material/TextField";
 import { Moment } from "moment";
-import { SearchParams } from '../Type';
+import { SearchParams } from '../utils/Type';
 
 interface SearchFormProps {
   search: SearchParams;

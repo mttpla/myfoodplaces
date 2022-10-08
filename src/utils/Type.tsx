@@ -1,3 +1,5 @@
+import { AlertColor } from "@mui/material/Alert";
+
 export interface UserInfoI {
   imageUrl?: string;
   name?: string;
@@ -28,6 +30,12 @@ export interface SearchParams {
   text: string;
   timeMin: Date;
   timeMax: Date;
+}
+
+export interface FeedbackMessage {
+  text: string;
+  severity: AlertColor;
+  open: boolean;
 }
 
 

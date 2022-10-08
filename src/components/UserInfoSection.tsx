@@ -1,6 +1,6 @@
 import React from "react";
 import { GoogleLogout } from "react-google-login";
-import { UserInfoI } from "../Type"
+import { UserInfoI } from "../utils/Type";
 
 interface UserInfoSectionProps {
   clientId: string;
