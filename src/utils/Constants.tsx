@@ -2,7 +2,7 @@ import { FeedbackMessage, Place } from "./Type";
 
 export const defaultPlace : Place = {
       summary: "name",
-      date: new Date().toISOString(),
+      date: new Date(),
 }
 
 export const defaultFeedbackMessage: FeedbackMessage = {
@@ -11,7 +11,6 @@ export const defaultFeedbackMessage: FeedbackMessage = {
   text: ""
 }
 
-export const genericErrorMessage: string = "Error"
-export const genericSuccessMessage: string = "OK";
+export const genericErrorMessage: string = "Error";
 
  

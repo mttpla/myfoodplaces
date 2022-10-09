@@ -23,7 +23,7 @@ export interface Place {
   price?: number;
   url?: string;  
   location?: string;
-  date: string
+  date: Date
 }
 
 export interface SearchParams {

@@ -14,11 +14,9 @@ export class CalendarService {
     this.setCalendar();
   }
 
-  private mapPlaceToGoogleEvent(place: Place): (any) {
+  private mapPlaceToGoogleEvent(place: Place): any {
     const gevent: any = {
       id: place.eventId,
-      created: place.created,
-      updated: place.updated,
       summary: place.summary,
       location: place.location,
       description: {
@@ -27,25 +25,26 @@ export class CalendarService {
         price: place.price,
         url: place.url,
       },
-      start : { date: place.date },
-    }
+      start: { date: place.date.toISOString().split("T")[0] },
+      end: { date: place.date.toISOString().split("T")[0] },
+    };
     return gevent;
   }
 
-  private mapGoogleEventToPlace(event: any):(Place) {
+  private mapGoogleEventToPlace(event: any): Place {
     const place: Place = {
       eventId: event.id,
       created: event.created,
       updated: event.updated,
       summary: event.summary,
       location: event.location,
-      date: event.start.date || event.start.dateTime,
+      date: new Date(event.start.date) || new Date(event.start.dateTime),
       vote: event.description?.vote,
       comment: event.description?.comment,
       url: event.description?.url,
       price: event.description?.price,
     };
-    
+
     return place;
   }
 
@@ -83,18 +82,34 @@ export class CalendarService {
     console.log("calendar selected: ", this.calendarId);
   }
 
-  
-
-  async createPlace(place: Place) {
+  async savePlace(place: Place) {
     if (this.isReady()) {
       const gevent = this.mapPlaceToGoogleEvent(place);
-      console.log(
-        "direct result",
+      if(place.eventId){
+        console.log("updatePlace: ", gevent);
+        await this.client.calendar.events.patch({
+          calendarId: this.calendarId,
+          eventId: gevent.id,
+          resource: gevent,
+        });
+      }else{
+        console.log("createPlace: ", gevent);
         await this.client.calendar.events.insert({
           calendarId: this.calendarId,
           resource: gevent,
-        })
-      ); 
+        });
+      }
+      
+    }
+  }
+
+  async deletePlace(placeId: string) {
+    if (this.isReady()) {
+      console.log("deletePlace ID: ", placeId);
+      await this.client.calendar.events.delete({
+        calendarId: this.calendarId,
+        eventId: placeId,
+      });
     }
   }
 
