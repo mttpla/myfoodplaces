@@ -5,8 +5,7 @@ import { Config, Place, SearchParams, FeedbackMessage, UserInfoI } from "./utils
 import {
   defaultFeedbackMessage,
   defaultPlace,
-  genericErrorMessage,
-  genericSuccessMessage,
+  genericErrorMessage
 } from "./utils/Constants";
 import WelcomePage from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
@@ -45,7 +44,7 @@ function App() {
 
 
   const handleFeedbackMessageClose = (
-    event?: React.SyntheticEvent | Event,
+    _event?: React.SyntheticEvent | Event,
     reason?: string
   ) => {
     if (reason === "clickaway") {
@@ -94,14 +93,7 @@ function App() {
   function updatePlaces(): void {
     calendar.current
       .getPlaces(searchParams)
-      .then((res) => {
-        setPlaces(res);
-        setFeedbackMessage({
-          open: true,
-          text: genericSuccessMessage,
-          severity: "success",
-        });
-      })
+      .then((res) => setPlaces(res))
       .catch((e) => {
         console.log(e);
         setFeedbackMessage({
@@ -117,11 +109,45 @@ function App() {
   const onSave = (place: Place) => {
     console.log("onSave: ", place);
     calendar.current
-      .createPlace(place)
+      .savePlace(place)
       .then(() => {
+        updatePlaces();
+        setCurrentPlaceId(null);
         setFeedbackMessage({
           open: true,
           text: "Saved",
+          severity: "success",
+        }); 
+      })
+      .catch((e) => {
+        console.log(e);
+        setFeedbackMessage({
+          open: true,
+          text: e.result?.error?.message || genericErrorMessage,
+          severity: "error",
+        });
+      });
+    
+  };
+
+  const onDelete = (place: Place) => {
+    console.log("onDelete: ", place.eventId);
+    if(!place.eventId){
+      setFeedbackMessage({
+        open: true,
+        text: "delete failed",
+        severity: "error",
+      });
+      return;
+    }
+    calendar.current
+      .deletePlace(place.eventId)
+      .then(() => {
+        updatePlaces();
+        setCurrentPlaceId(null);
+        setFeedbackMessage({
+          open: true,
+          text: "Deleted",
           severity: "success",
         });
       })
@@ -137,15 +163,15 @@ function App() {
     setCurrentPlaceId(null);
   };
 
-  const onDelete = (place: Place) => {
-    console.log("onDelete: ", place);
-    updatePlaces();
-    setCurrentPlaceId(null);
-  };
-
-  const onSelect = (placeId: string) => {
-    console.log("onSelect: ", placeId);
-    setCurrentPlaceId(placeId);
+  const onSelect = (place: Place) => {
+    console.log("onSelect: ", place)
+    if(place && place.eventId){
+      setCurrentPlaceId(place.eventId);
+    }else{
+      console.log("onSelect:  set current placeId to undefined");
+      updatePlaces();
+      setCurrentPlaceId(null);
+    }
   }
 
   return (
@@ -160,7 +186,8 @@ function App() {
             />
             <div style={{ padding: "0.5em" }}>
               <div>
-                <SearchForm search={searchParams} searchFn={setSearchParams} />
+                { currentPlaceId === null &&
+                  <SearchForm search={searchParams} searchFn={setSearchParams} />}
                 <PlaceList
                   places={places}
                   onSelect={onSelect}
@@ -172,9 +199,8 @@ function App() {
             </div>
 
             <Fab
-              disabled={currentPlaceId === undefined}
+              disabled={!(currentPlaceId === null)}
               onClick={() => {
-                console.log("FAB");
                 const placeList: Place[] = [defaultPlace, ...places];
                 setPlaces(placeList);
                 setCurrentPlaceId(undefined);
@@ -184,9 +210,11 @@ function App() {
             >
               <AddIcon />
             </Fab>
-            <Snackbar open={feedbackMessage.open} 
-              autoHideDuration={6000} 
-              onClose={handleFeedbackMessageClose}>
+            <Snackbar
+              open={feedbackMessage.open}
+              autoHideDuration={6000}
+              onClose={handleFeedbackMessageClose}
+            >
               <Alert
                 onClose={handleFeedbackMessageClose}
                 severity={feedbackMessage.severity}
