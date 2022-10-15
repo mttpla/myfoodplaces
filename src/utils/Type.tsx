@@ -36,6 +36,7 @@ export interface FeedbackMessage {
   text: string;
   severity: AlertColor;
   open: boolean;
+  autoHideDuration: number | null;
 }
 
 

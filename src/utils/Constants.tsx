@@ -8,8 +8,20 @@ export const defaultPlace : Place = {
 export const defaultFeedbackMessage: FeedbackMessage = {
   open: false,
   severity: "success",
-  text: ""
+  text: "",
+  autoHideDuration: 6000 
 }
+
+export const successFeedbackMessage: FeedbackMessage = {
+  ...defaultFeedbackMessage,
+  open: true,
+};
+
+export const errorFeedbackMessage: FeedbackMessage = {
+  ...defaultFeedbackMessage,
+  open: true,
+  autoHideDuration: null,
+};
 
 export const genericErrorMessage: string = "Error";
 
