@@ -20,6 +20,7 @@ export const successFeedbackMessage: FeedbackMessage = {
 export const errorFeedbackMessage: FeedbackMessage = {
   ...defaultFeedbackMessage,
   open: true,
+  severity: "error",
   autoHideDuration: null,
 };
 
