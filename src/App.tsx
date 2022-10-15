@@ -5,7 +5,9 @@ import { Config, Place, SearchParams, FeedbackMessage, UserInfoI } from "./utils
 import {
   defaultFeedbackMessage,
   defaultPlace,
-  genericErrorMessage
+  errorFeedbackMessage,
+  genericErrorMessage,
+  successFeedbackMessage
 } from "./utils/Constants";
 import WelcomePage from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
@@ -17,7 +19,7 @@ import Fab from "@mui/material/Fab";
 import AddIcon from '@mui/icons-material/Add';
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-
+import { useGoogleLogout } from "react-google-login";
 
 const config: Config = {
   clientId: process.env.REACT_APP_CLIENTID || "missing key",
@@ -42,6 +44,20 @@ function App() {
 
   const [feedbackMessage, setFeedbackMessage] = useState<FeedbackMessage>(defaultFeedbackMessage);
 
+  const onLoginSuccess = (userInfo: UserInfoI) => {
+    console.log("set user");
+    setUserInfo(userInfo);
+  };
+
+  const onLogoutSuccess = () => {
+    console.log("set user to null");
+    setUserInfo(null);
+  };
+
+  const { signOut } = useGoogleLogout({
+    clientId: config.clientId,
+    onLogoutSuccess: onLogoutSuccess,
+  });
 
   const handleFeedbackMessageClose = (
     _event?: React.SyntheticEvent | Event,
@@ -55,6 +71,7 @@ function App() {
 
   useEffect(() => {
     const initClient = () => {
+      console.log("APP: initClient")
       gapi.client.init({
         clientId: config.clientId,
         scope: config.scope,
@@ -67,9 +84,14 @@ function App() {
 
   useEffect(() =>{
     if (userInfo) {
-      calendar.current.init(gapi);
+        calendar.current.init(gapi).then(() => {
+          console.log("App: Init calendar success!");
+        }).catch((e) =>{
+          console.log("App: Init calendar failed! Error: ", e);
+          signOut()
+        });
     }
-  }, [userInfo])
+  }, [userInfo, signOut])
 
   useEffect(() => {
     updatePlaces();
@@ -78,17 +100,6 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  
-
-  const onLoginSuccess = (userInfo: UserInfoI) => {
-    console.log("set user");
-    setUserInfo(userInfo);
-  };
-
-  const onLogoutSuccess = () => {
-    console.log("set user to null");
-    setUserInfo(null);
-  };
 
   function updatePlaces(): void {
     calendar.current
@@ -97,9 +108,8 @@ function App() {
       .catch((e) => {
         console.log(e);
         setFeedbackMessage({
-          open: true,
+          ...errorFeedbackMessage,
           text: e.result?.error?.message || genericErrorMessage,
-          severity: "error",
         });
       });
     console.log("App: getPlaces: ", searchParams);
@@ -114,17 +124,15 @@ function App() {
         updatePlaces();
         setCurrentPlaceId(null);
         setFeedbackMessage({
-          open: true,
+          ...successFeedbackMessage,
           text: "Saved",
-          severity: "success",
         }); 
       })
       .catch((e) => {
         console.log(e);
         setFeedbackMessage({
-          open: true,
+          ...errorFeedbackMessage,
           text: e.result?.error?.message || genericErrorMessage,
-          severity: "error",
         });
       });
     
@@ -134,9 +142,8 @@ function App() {
     console.log("onDelete: ", place.eventId);
     if(!place.eventId){
       setFeedbackMessage({
-        open: true,
+        ...errorFeedbackMessage,
         text: "delete failed",
-        severity: "error",
       });
       return;
     }
@@ -146,17 +153,15 @@ function App() {
         updatePlaces();
         setCurrentPlaceId(null);
         setFeedbackMessage({
-          open: true,
+          ...successFeedbackMessage,
           text: "Deleted",
-          severity: "success",
         });
       })
       .catch((e) => {
         console.log(e);
         setFeedbackMessage({
-          open: true,
+          ...errorFeedbackMessage,
           text: e.result?.error?.message || genericErrorMessage,
-          severity: "error",
         });
       });
     updatePlaces();
@@ -186,8 +191,12 @@ function App() {
             />
             <div style={{ padding: "0.5em" }}>
               <div>
-                { currentPlaceId === null &&
-                  <SearchForm search={searchParams} searchFn={setSearchParams} />}
+                {currentPlaceId === null && (
+                  <SearchForm
+                    search={searchParams}
+                    searchFn={setSearchParams}
+                  />
+                )}
                 <PlaceList
                   places={places}
                   onSelect={onSelect}
@@ -212,7 +221,7 @@ function App() {
             </Fab>
             <Snackbar
               open={feedbackMessage.open}
-              autoHideDuration={6000}
+              autoHideDuration={feedbackMessage.autoHideDuration}
               onClose={handleFeedbackMessageClose}
             >
               <Alert

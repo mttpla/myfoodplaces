@@ -7,11 +7,13 @@ export class CalendarService {
   private client: any;
   private calendar: any;
 
-  init(gapi: any) {
+  async init(gapi: any) {
     console.log("CalendarService init", gapi);
     this.client = gapi.client;
     this.calendar = gapi.client.calendar;
-    this.setCalendar();
+    if (this.calendarId === this.DEFAULT_CALENDAR_ID){
+      await this.setCalendar();
+    } 
   }
 
   private mapPlaceToGoogleEvent(place: Place): any {
@@ -66,7 +68,7 @@ export class CalendarService {
     }
   };
 
-  private async setCalendar(): Promise<void> {
+  private async setCalendar() {
     if (this.checkGapi()) {
       const calList = (await this.calendar.calendarList.list()).result.items;
       let cal = calList.find((obj: { summary: string }) => {
@@ -79,7 +81,10 @@ export class CalendarService {
       }
       this.calendarId = cal.id;
     }
-    console.log("calendar selected: ", this.calendarId);
+    console.log(
+      "CalendarService setCalendar: calendar selected: ",
+      this.calendarId
+    );
   }
 
   async savePlace(place: Place) {
