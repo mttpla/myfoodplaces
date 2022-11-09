@@ -1,4 +1,4 @@
-import { Place, SearchParams } from "../utils/Type";
+import { GoogleDescription, Place, SearchParams } from "../utils/Type";
 
 export class CalendarService {
   private DEFAULT_CALENDAR_ID = "primary";
@@ -19,14 +19,14 @@ export class CalendarService {
   private mapPlaceToGoogleEvent(place: Place): any {
     const gevent: any = {
       id: place.eventId,
-      summary: place.summary,
-      location: place.location,
-      description: {
+      summary: place.summary.trim(),
+      location: place.location?.trim(),
+      description: JSON.stringify({
         vote: place.vote,
-        comment: place.comment,
+        comment: place.comment?.trim(),
         price: place.price,
-        url: place.url,
-      },
+        url: place.url?.trim(),
+      }),
       start: { date: place.date.toISOString().split("T")[0] },
       end: { date: place.date.toISOString().split("T")[0] },
     };
@@ -34,6 +34,7 @@ export class CalendarService {
   }
 
   private mapGoogleEventToPlace(event: any): Place {
+    
     const place: Place = {
       eventId: event.id,
       created: event.created,
@@ -41,11 +42,17 @@ export class CalendarService {
       summary: event.summary,
       location: event.location,
       date: new Date(event.start.date) || new Date(event.start.dateTime),
-      vote: event.description?.vote,
-      comment: event.description?.comment,
-      url: event.description?.url,
-      price: event.description?.price,
+      comment: event.description,
     };
+    try {
+      const descriptionObj: GoogleDescription = JSON.parse(event.description);
+      place.comment = descriptionObj.comment
+      place.url = descriptionObj.url
+      place.price = descriptionObj.price
+      place.vote = descriptionObj.vote
+    } catch (e) {
+      console.log("google description exception, all data save in place.comment, EventId: ", event.id);
+    }
 
     return place;
   }

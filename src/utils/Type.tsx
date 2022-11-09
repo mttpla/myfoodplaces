@@ -26,6 +26,13 @@ export interface Place {
   date: Date
 }
 
+export interface GoogleDescription {
+  vote?: number;
+  comment?: string;
+  price?: number;
+  url?: string;
+}
+
 export interface SearchParams {
   text: string;
   timeMin: Date;
