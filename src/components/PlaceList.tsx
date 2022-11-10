@@ -10,28 +10,26 @@ interface PlacesProps {
   onDelete: CallableFunction;
 }
 
-class PlaceList extends React.Component<PlacesProps> {
+export function PlaceList(props: PlacesProps) {
   
-  render() {
+  
     return (
       <>
         <h4>Places</h4>
         <div>
-          {this.props.places.length === 0 && <p>No events to show</p>}
-          {this.props.places.map((place: Place) => (
+          {props.places.length === 0 && <p>No events to show</p>}
+          {props.places.map((place: Place) => (
             <PlaceCard
               key={place.eventId || "newPlace"}
               place={place}
-              editMode={place.eventId === this.props.currentPlaceId}
-              onSave={this.props.onSave}
-              onDelete={this.props.onDelete}
-              onSelect={this.props.onSelect}
+              editMode={place.eventId === props.currentPlaceId}
+              onSave={props.onSave}
+              onDelete={props.onDelete}
+              onSelect={props.onSelect}
             />
           ))}
         </div>
       </>
     );
   }
-}
 
-export default PlaceList;

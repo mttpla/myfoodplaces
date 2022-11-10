@@ -14,7 +14,7 @@ import UserInfoSection from "./components/UserInfoSection";
 import { CalendarService } from "./services/CalendarService";
 import SearchForm from "./components/SearchForm";
 import moment from "moment";
-import PlaceList from "./components/PlaceList";
+import { PlaceList } from "./components/PlaceList";
 import Fab from "@mui/material/Fab";
 import AddIcon from '@mui/icons-material/Add';
 import Snackbar from "@mui/material/Snackbar";
