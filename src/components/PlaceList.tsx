@@ -1,6 +1,6 @@
 import React from "react";
 import { Place } from "../utils/Type";
-import PlaceCard from "./PlaceCard";
+import { PlaceCard } from "./PlaceCard";
 
 interface PlacesProps {
   places: Place[];
