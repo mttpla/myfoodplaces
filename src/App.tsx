@@ -121,7 +121,6 @@ function App() {
     calendar.current
       .savePlace(place)
       .then(() => {
-        updatePlaces();
         setCurrentPlaceId(null);
         setFeedbackMessage({
           ...successFeedbackMessage,
@@ -150,7 +149,7 @@ function App() {
     calendar.current
       .deletePlace(place.eventId)
       .then(() => {
-        updatePlaces();
+        setPlaces(places.filter((obj) => obj.eventId !== place.eventId));
         setCurrentPlaceId(null);
         setFeedbackMessage({
           ...successFeedbackMessage,
@@ -210,7 +209,7 @@ function App() {
             <Fab
               disabled={!(currentPlaceId === null)}
               onClick={() => {
-                const placeList: Place[] = [defaultPlace, ...places];
+                const placeList: Place[] = [{...defaultPlace}, ...places];
                 setPlaces(placeList);
                 setCurrentPlaceId(undefined);
               }}
