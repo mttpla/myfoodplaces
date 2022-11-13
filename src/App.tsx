@@ -1,30 +1,33 @@
 import { useState, useEffect, useRef } from "react";
-import './App.css';
+import "./App.css";
 import { gapi } from "gapi-script";
-import { Config, Place, SearchParams, FeedbackMessage, UserInfoI } from "./utils/Type";
+import {
+  Config,
+  Place,
+  SearchParams,
+  FeedbackMessage,
+  UserInfoI,
+} from "./utils/Type";
 import {
   defaultFeedbackMessage,
   defaultPlace,
   errorFeedbackMessage,
   genericErrorMessage,
-  successFeedbackMessage
+  successFeedbackMessage,
 } from "./utils/Constants";
-import { WelcomePage } from "./components/WelcomePage"
+import { WelcomePage } from "./components/WelcomePage";
 import { UserInfoSection } from "./components/UserInfoSection";
 import { CalendarService } from "./services/CalendarService";
 import { SearchForm } from "./components/SearchForm";
 import moment from "moment";
 import { PlaceList } from "./components/PlaceList";
 import Fab from "@mui/material/Fab";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useGoogleLogout } from "react-google-login";
 import "./utils/I18n";
 import { useTranslation } from "react-i18next";
-
-
-
 
 const config: Config = {
   clientId: process.env.REACT_APP_CLIENTID || "missing key",
@@ -37,17 +40,21 @@ const config: Config = {
 
 function App() {
   const { t } = useTranslation();
-  const [userInfo, setUserInfo] = useState<UserInfoI | null >(null);
+  const [userInfo, setUserInfo] = useState<UserInfoI | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [searchParams, setSearchParams] = useState<SearchParams>({
     text: "",
-    timeMin: moment().subtract(1, 'years').toDate(), 
+    timeMin: moment().subtract(1, "years").toDate(),
     timeMax: new Date(),
   });
-  const [currentPlaceId, setCurrentPlaceId] = useState<string | undefined | null>(null);
+  const [currentPlaceId, setCurrentPlaceId] = useState<
+    string | undefined | null
+  >(null);
   const calendar = useRef(new CalendarService());
 
-  const [feedbackMessage, setFeedbackMessage] = useState<FeedbackMessage>(defaultFeedbackMessage);
+  const [feedbackMessage, setFeedbackMessage] = useState<FeedbackMessage>(
+    defaultFeedbackMessage
+  );
 
   const onLoginSuccess = (userInfo: UserInfoI) => {
     console.log("set user");
@@ -76,7 +83,7 @@ function App() {
 
   useEffect(() => {
     const initClient = () => {
-      console.log("APP: initClient")
+      console.log("APP: initClient");
       gapi.client.init({
         clientId: config.clientId,
         scope: config.scope,
@@ -87,24 +94,26 @@ function App() {
     gapi.load("client:auth2", initClient);
   }, []);
 
-  useEffect(() =>{
+  useEffect(() => {
     if (userInfo) {
-        calendar.current.init(gapi).then(() => {
+      calendar.current
+        .init(gapi)
+        .then(() => {
           console.log("App: Init calendar success!");
-        }).catch((e) =>{
+        })
+        .catch((e) => {
           console.log("App: Init calendar failed! Error: ", e);
-          signOut()
+          signOut();
         });
     }
-  }, [userInfo, signOut])
+  }, [userInfo, signOut]);
 
   useEffect(() => {
     updatePlaces();
     console.log("App: getPlaces: ", searchParams);
     setCurrentPlaceId(null);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
-
 
   function updatePlaces(): void {
     calendar.current
@@ -120,7 +129,6 @@ function App() {
     console.log("App: getPlaces: ", searchParams);
   }
 
-
   const onSave = (place: Place) => {
     console.log("onSave: ", place);
     calendar.current
@@ -129,8 +137,8 @@ function App() {
         setCurrentPlaceId(null);
         setFeedbackMessage({
           ...successFeedbackMessage,
-          text: t('t.saved'),
-        }); 
+          text: t("t.saved"),
+        });
       })
       .catch((e) => {
         console.log(e);
@@ -143,7 +151,7 @@ function App() {
 
   const onDelete = (place: Place) => {
     console.log("onDelete: ", place.eventId);
-    if(!place.eventId){
+    if (!place.eventId) {
       setFeedbackMessage({
         ...errorFeedbackMessage,
         text: t("t.deleteFailed"),
@@ -157,7 +165,7 @@ function App() {
         setCurrentPlaceId(null);
         setFeedbackMessage({
           ...successFeedbackMessage,
-          text: t('t.deleted'),
+          text: t("t.deleted"),
         });
       })
       .catch((e) => {
@@ -172,15 +180,15 @@ function App() {
   };
 
   const onSelect = (place: Place) => {
-    console.log("onSelect: ", place)
-    if(place && place.eventId){
+    console.log("onSelect: ", place);
+    if (place && place.eventId) {
       setCurrentPlaceId(place.eventId);
-    }else{
+    } else {
       console.log("onSelect:  set current placeId to undefined");
       updatePlaces();
       setCurrentPlaceId(null);
     }
-  }
+  };
 
   return (
     <div className="App">
@@ -213,7 +221,7 @@ function App() {
             <Fab
               disabled={!(currentPlaceId === null)}
               onClick={() => {
-                const placeList: Place[] = [{...defaultPlace}, ...places];
+                const placeList: Place[] = [{ ...defaultPlace }, ...places];
                 setPlaces(placeList);
                 setCurrentPlaceId(undefined);
               }}
@@ -245,7 +253,6 @@ function App() {
       </header>
     </div>
   );
-
 }
 
 export default App;

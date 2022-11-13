@@ -14,16 +14,16 @@ export interface Config {
 }
 
 export interface Place {
-  eventId?: string,
-  created?: string,
-  updated?: string,
+  eventId?: string;
+  created?: string;
+  updated?: string;
   summary: string;
   vote?: number;
   comment?: string;
   price?: number;
-  url?: string;  
+  url?: string;
   location?: string;
-  date: Date
+  date: Date;
 }
 
 export interface GoogleDescription {
@@ -45,5 +45,3 @@ export interface FeedbackMessage {
   open: boolean;
   autoHideDuration: number | null;
 }
-
-

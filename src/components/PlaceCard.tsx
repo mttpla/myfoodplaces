@@ -7,7 +7,6 @@ import React, { useState } from "react";
 import { Place } from "../utils/Type";
 import { useTranslation } from "react-i18next";
 
-
 interface PlaceCardProps {
   place: Place;
   editMode: boolean;
@@ -17,9 +16,9 @@ interface PlaceCardProps {
 }
 
 export function PlaceCard(props: PlaceCardProps) {
-  const { t } = useTranslation();  
+  const { t } = useTranslation();
   const [place, setPlace] = useState<Place>(props.place);
-    
+
   return (
     <>
       <div>
@@ -154,4 +153,4 @@ export function PlaceCard(props: PlaceCardProps) {
       </Button>
     </>
   );
-    }
+}

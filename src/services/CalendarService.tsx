@@ -11,9 +11,9 @@ export class CalendarService {
     console.log("CalendarService init", gapi);
     this.client = gapi.client;
     this.calendar = gapi.client.calendar;
-    if (this.calendarId === this.DEFAULT_CALENDAR_ID){
+    if (this.calendarId === this.DEFAULT_CALENDAR_ID) {
       await this.setCalendar();
-    } 
+    }
   }
 
   private mapPlaceToGoogleEvent(place: Place): any {
@@ -34,7 +34,6 @@ export class CalendarService {
   }
 
   private mapGoogleEventToPlace(event: any): Place {
-    
     const place: Place = {
       eventId: event.id,
       created: event.created,
@@ -46,12 +45,15 @@ export class CalendarService {
     };
     try {
       const descriptionObj: GoogleDescription = JSON.parse(event.description);
-      place.comment = descriptionObj.comment
-      place.url = descriptionObj.url
-      place.price = descriptionObj.price
-      place.vote = descriptionObj.vote
+      place.comment = descriptionObj.comment;
+      place.url = descriptionObj.url;
+      place.price = descriptionObj.price;
+      place.vote = descriptionObj.vote;
     } catch (e) {
-      console.log("google description exception, all data save in place.comment, EventId: ", event.id);
+      console.log(
+        "google description exception, all data save in place.comment, EventId: ",
+        event.id
+      );
     }
 
     return place;
@@ -97,21 +99,20 @@ export class CalendarService {
   async savePlace(place: Place) {
     if (this.isReady()) {
       const gevent = this.mapPlaceToGoogleEvent(place);
-      if(place.eventId){
+      if (place.eventId) {
         console.log("updatePlace: ", gevent);
         await this.client.calendar.events.patch({
           calendarId: this.calendarId,
           eventId: gevent.id,
           resource: gevent,
         });
-      }else{
+      } else {
         console.log("createPlace: ", gevent);
         await this.client.calendar.events.insert({
           calendarId: this.calendarId,
           resource: gevent,
         });
       }
-      
     }
   }
 
