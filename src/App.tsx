@@ -20,6 +20,11 @@ import AddIcon from '@mui/icons-material/Add';
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useGoogleLogout } from "react-google-login";
+import "./utils/I18n";
+import { useTranslation } from "react-i18next";
+
+
+
 
 const config: Config = {
   clientId: process.env.REACT_APP_CLIENTID || "missing key",
@@ -31,7 +36,7 @@ const config: Config = {
 };
 
 function App() {
-  
+  const { t } = useTranslation();
   const [userInfo, setUserInfo] = useState<UserInfoI | null >(null);
   const [places, setPlaces] = useState<Place[]>([]);
   const [searchParams, setSearchParams] = useState<SearchParams>({
@@ -124,17 +129,16 @@ function App() {
         setCurrentPlaceId(null);
         setFeedbackMessage({
           ...successFeedbackMessage,
-          text: "Saved",
+          text: t('t.saved'),
         }); 
       })
       .catch((e) => {
         console.log(e);
         setFeedbackMessage({
           ...errorFeedbackMessage,
-          text: e.result?.error?.message || genericErrorMessage,
+          text: e.result?.error?.message || t(genericErrorMessage),
         });
       });
-    
   };
 
   const onDelete = (place: Place) => {
@@ -142,7 +146,7 @@ function App() {
     if(!place.eventId){
       setFeedbackMessage({
         ...errorFeedbackMessage,
-        text: "delete failed",
+        text: t("t.deleteFailed"),
       });
       return;
     }
@@ -153,7 +157,7 @@ function App() {
         setCurrentPlaceId(null);
         setFeedbackMessage({
           ...successFeedbackMessage,
-          text: "Deleted",
+          text: t('t.deleted'),
         });
       })
       .catch((e) => {
@@ -178,6 +182,8 @@ function App() {
     }
   }
 
+  
+  console.log("saved traslated: --", t('t.saved'));
   return (
     <div className="App">
       <header className="App-header">

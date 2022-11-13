@@ -24,6 +24,6 @@ export const errorFeedbackMessage: FeedbackMessage = {
   autoHideDuration: null,
 };
 
-export const genericErrorMessage: string = "Error";
+export const genericErrorMessage: string = "t.error";
 
  
