@@ -1,5 +1,3 @@
-import { t } from "i18next";
-import React from "react";
 import { GoogleLogout } from "react-google-login";
 import { useTranslation } from "react-i18next";
 import { UserInfoI } from "../utils/Type";
