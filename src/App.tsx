@@ -9,7 +9,7 @@ import {
   genericErrorMessage,
   successFeedbackMessage
 } from "./utils/Constants";
-import WelcomePage from "./components/WelcomePage"
+import { WelcomePage } from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
 import { CalendarService } from "./services/CalendarService";
 import SearchForm from "./components/SearchForm";
@@ -182,8 +182,6 @@ function App() {
     }
   }
 
-  
-  console.log("saved traslated: --", t('t.saved'));
   return (
     <div className="App">
       <header className="App-header">

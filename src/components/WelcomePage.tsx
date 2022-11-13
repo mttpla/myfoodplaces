@@ -1,32 +1,22 @@
 import React from "react";
 import { GoogleLogin } from "react-google-login";
+import { useTranslation } from "react-i18next";
 
 interface WelcomePageProps {
   clientId: string;
   onLoginSuccess: CallableFunction;
 }
 
-class WelcomePage extends React.Component<WelcomePageProps> {
-  onLoginSuccess = (res: any) => {
-    this.props.onLoginSuccess(res.profileObj);
-  };
+export function WelcomePage(props: WelcomePageProps) {
+  const { t } = useTranslation();
 
-  onLoginFailure = (err: any) => {
-    console.log("failed:", err);
-  };
-
-  render() {
-    return (
-      <GoogleLogin
-        clientId={this.props.clientId}
-        buttonText="Sign in with Google"
-        onSuccess={this.onLoginSuccess}
-        onFailure={this.onLoginFailure}
-        cookiePolicy={"single_host_origin"}
-        isSignedIn={true}
-      />
+  return (
+      <><h1>{t('t.welcome')}</h1><GoogleLogin
+      clientId={props.clientId}
+      buttonText="Sign in with Google"
+      onSuccess={(res: any) => { props.onLoginSuccess(res.profileObj); } }
+      onFailure={(err: any) => { console.log("failed:", err); } }
+      cookiePolicy={"single_host_origin"}
+      isSignedIn={true} /></>
     );
-  }
 }
-
-export default WelcomePage;
