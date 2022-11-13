@@ -12,7 +12,7 @@ import {
 import { WelcomePage } from "./components/WelcomePage"
 import UserInfoSection from "./components/UserInfoSection";
 import { CalendarService } from "./services/CalendarService";
-import SearchForm from "./components/SearchForm";
+import { SearchForm } from "./components/SearchForm";
 import moment from "moment";
 import { PlaceList } from "./components/PlaceList";
 import Fab from "@mui/material/Fab";
