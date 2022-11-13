@@ -10,7 +10,7 @@ import {
   successFeedbackMessage
 } from "./utils/Constants";
 import { WelcomePage } from "./components/WelcomePage"
-import UserInfoSection from "./components/UserInfoSection";
+import { UserInfoSection } from "./components/UserInfoSection";
 import { CalendarService } from "./services/CalendarService";
 import { SearchForm } from "./components/SearchForm";
 import moment from "moment";

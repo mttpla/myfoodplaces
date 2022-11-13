@@ -1,5 +1,7 @@
+import { t } from "i18next";
 import React from "react";
 import { GoogleLogout } from "react-google-login";
+import { useTranslation } from "react-i18next";
 import { UserInfoI } from "../utils/Type";
 
 interface UserInfoSectionProps {
@@ -8,30 +10,28 @@ interface UserInfoSectionProps {
   onLogoutSuccess: CallableFunction;
 }
 
-class UserInfoSection extends React.Component<UserInfoSectionProps> {
+export function UserInfoSection(props: UserInfoSectionProps) {
+  const { t } = useTranslation();
   
-  onLogoutSuccess = () => {
-    this.props.onLogoutSuccess();
-  };
-
-  render() {
     return (
       <div>
         <img
-          src={this.props.userInfo.imageUrl}
+          src={props.userInfo.imageUrl}
           alt="user"
           referrerPolicy="no-referrer"
         />
-        <p>Name: {this.props.userInfo.name}</p>
-        <p>Email Address: {this.props.userInfo.email}</p>
+        <p>Name: {props.userInfo.name}</p>
+        <p>Email Address: {props.userInfo.email}</p>
         <GoogleLogout
-          clientId={this.props.clientId}
-          buttonText="Log out"
-          onLogoutSuccess={this.onLogoutSuccess}
+          clientId={props.clientId}
+          buttonText={t('t.logoutButton')}
+          onLogoutSuccess={() => {
+            props.onLogoutSuccess();
+          }}
         />
       </div>
     );
-  }
+  
 }
 
-export default UserInfoSection;
+
